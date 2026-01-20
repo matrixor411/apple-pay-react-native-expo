@@ -1,5 +1,6 @@
 import ExpoModulesCore
 import PassKit
+import Contacts
 
 struct PaymentRequestItemData: Record {
     @Field
@@ -24,9 +25,12 @@ struct PaymentRequestData: Record {
     
     @Field
     var supportedNetworks: [String]
-    
+
     @Field
     var paymentSummaryItems: [PaymentRequestItemData]
+
+    @Field
+    var requiredBillingContactFields: [String]? = nil
 }
 
 typealias PaymentCompletionHandler = (PKPaymentAuthorizationResult) -> Void
@@ -49,6 +53,9 @@ class PaymentHandler: NSObject  {
         paymentRequest.countryCode = data.countryCode
         paymentRequest.currencyCode = data.currencyCode
         paymentRequest.supportedNetworks = getSupportedNetworksFromData(jsSupportedNetworks: data.supportedNetworks)
+        if let fields = data.requiredBillingContactFields, !fields.isEmpty {
+            paymentRequest.requiredBillingContactFields = getContactFieldsFromData(jsContactFields: fields)
+        }
         
         //        paymentRequest.shippingType = .delivery
         //        paymentRequest.shippingMethods = shippingMethodCalculator()
@@ -145,6 +152,93 @@ class PaymentHandler: NSObject  {
         
         return supportedNetworks;
     }
+
+    private func getContactFieldsFromData(jsContactFields: [String]) -> Set<PKContactField> {
+        var fieldMap = [String: PKContactField]()
+        fieldMap["name"] = PKContactField.name
+        fieldMap["emailAddress"] = PKContactField.emailAddress
+        fieldMap["phoneNumber"] = PKContactField.phoneNumber
+        fieldMap["postalAddress"] = PKContactField.postalAddress
+
+        var fields = Set<PKContactField>()
+        for field in jsContactFields {
+            if let contactField = fieldMap[field] {
+                fields.insert(contactField)
+            }
+        }
+
+        return fields
+    }
+
+    private func serializeBillingContact(_ contact: PKContact) -> [String: Any] {
+        var contactDict: [String: Any] = [:]
+
+        if let name = contact.name {
+            var nameDict: [String: Any] = [:]
+            if let namePrefix = name.namePrefix, !namePrefix.isEmpty {
+                nameDict["namePrefix"] = namePrefix
+            }
+            if let givenName = name.givenName, !givenName.isEmpty {
+                nameDict["givenName"] = givenName
+            }
+            if let middleName = name.middleName, !middleName.isEmpty {
+                nameDict["middleName"] = middleName
+            }
+            if let familyName = name.familyName, !familyName.isEmpty {
+                nameDict["familyName"] = familyName
+            }
+            if let nameSuffix = name.nameSuffix, !nameSuffix.isEmpty {
+                nameDict["nameSuffix"] = nameSuffix
+            }
+            if let nickname = name.nickname, !nickname.isEmpty {
+                nameDict["nickname"] = nickname
+            }
+            if !nameDict.isEmpty {
+                contactDict["name"] = nameDict
+            }
+        }
+
+        if let emailAddress = contact.emailAddress, !emailAddress.isEmpty {
+            contactDict["emailAddress"] = emailAddress
+        }
+
+        if let phoneNumber = contact.phoneNumber?.stringValue, !phoneNumber.isEmpty {
+            contactDict["phoneNumber"] = phoneNumber
+        }
+
+        if let postalAddress = contact.postalAddress {
+            var postalDict: [String: Any] = [:]
+            if !postalAddress.street.isEmpty {
+                postalDict["street"] = postalAddress.street
+            }
+            if !postalAddress.city.isEmpty {
+                postalDict["city"] = postalAddress.city
+            }
+            if !postalAddress.state.isEmpty {
+                postalDict["state"] = postalAddress.state
+            }
+            if !postalAddress.postalCode.isEmpty {
+                postalDict["postalCode"] = postalAddress.postalCode
+            }
+            if !postalAddress.country.isEmpty {
+                postalDict["country"] = postalAddress.country
+            }
+            if !postalAddress.isoCountryCode.isEmpty {
+                postalDict["isoCountryCode"] = postalAddress.isoCountryCode
+            }
+            if !postalAddress.subLocality.isEmpty {
+                postalDict["subLocality"] = postalAddress.subLocality
+            }
+            if !postalAddress.subAdministrativeArea.isEmpty {
+                postalDict["subAdministrativeArea"] = postalAddress.subAdministrativeArea
+            }
+            if !postalDict.isEmpty {
+                contactDict["postalAddress"] = postalDict
+            }
+        }
+
+        return contactDict
+    }
 }
 
 extension PaymentHandler: PKPaymentAuthorizationControllerDelegate {
@@ -190,7 +284,19 @@ extension PaymentHandler: PKPaymentAuthorizationControllerDelegate {
                     "token": tokenData
                 ]
             ]
-            
+
+            if let billingContact = payment.billingContact {
+                let billingContactDict = serializeBillingContact(billingContact)
+                if !billingContactDict.isEmpty,
+                   var paymentDict = paymentObject["payment"] as? [String: Any] {
+                    paymentDict["billingContact"] = billingContactDict
+                    let resolved: [String: Any] = ["payment": paymentDict]
+                    promise?.resolve(resolved)
+                    promise = nil
+                    return
+                }
+            }
+
             promise?.resolve(paymentObject)
             promise = nil
         } catch {

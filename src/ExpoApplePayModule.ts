@@ -11,6 +11,12 @@ export default {
     currencyCode: string;
     merchantCapabilities: MerchantCapability[];
     supportedNetworks: PaymentNetwork[];
+    requiredBillingContactFields?: (
+      | "name"
+      | "emailAddress"
+      | "phoneNumber"
+      | "postalAddress"
+    )[];
     paymentSummaryItems: {
       label: string;
       amount: string;

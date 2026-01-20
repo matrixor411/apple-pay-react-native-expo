@@ -73,6 +73,7 @@ ApplePay.show({
     currencyCode: "USD",
     merchantCapabilities: [MerchantCapability["3DS"]],
     supportedNetworks: [PaymentNetwork.masterCard, PaymentNetwork.visa],
+    requiredBillingContactFields: ["name", "emailAddress", "phoneNumber", "postalAddress"],
     paymentSummaryItems: [
         {
             label: "Ice",
@@ -87,6 +88,7 @@ ApplePay.show({
 .then((paymentData) => {
     // process paymentData on your server
     // then complete the payment process
+    // billing contact (if requested) is available on paymentData.payment.billingContact
     ApplePay.complete(
         CompleteStatus.success
     );
@@ -104,6 +106,12 @@ You can dismiss the dialog
 ```js
 ApplePay.dismiss();
 ```
+
+## Billing contact
+
+Pass `requiredBillingContactFields` to request billing contact data. If available, it will be returned in `paymentData.payment.billingContact`.
+
+Allowed fields: `name`, `emailAddress`, `phoneNumber`, `postalAddress`.
 
 ## TODO:
 - requiredShippingContactFields 

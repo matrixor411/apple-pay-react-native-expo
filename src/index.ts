@@ -1,5 +1,7 @@
 import {
 	CompleteStatus,
+	type BillingContact,
+	type BillingContactField,
 	type FullPaymentData,
 	MerchantCapability,
 	PaymentNetwork,
@@ -13,6 +15,7 @@ export default {
 		currencyCode: string;
 		merchantCapabilities: MerchantCapability[];
 		supportedNetworks: PaymentNetwork[];
+		requiredBillingContactFields?: BillingContactField[];
 		paymentSummaryItems: {
 			label: string;
 			amount: number;
@@ -35,4 +38,10 @@ export default {
 	},
 };
 
-export { MerchantCapability, PaymentNetwork, CompleteStatus };
+export {
+	MerchantCapability,
+	PaymentNetwork,
+	CompleteStatus,
+	type BillingContact,
+	type BillingContactField,
+};

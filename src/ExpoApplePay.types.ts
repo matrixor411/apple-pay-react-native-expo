@@ -40,6 +40,12 @@ export enum CompleteStatus {
 	failure = 1, // Merchant failed to auth the transaction.
 }
 
+export type BillingContactField =
+	| "name"
+	| "emailAddress"
+	| "phoneNumber"
+	| "postalAddress";
+
 export type PaymentData = {
 	data: string;
 	header: {
@@ -63,8 +69,32 @@ export type PaymentToken = {
 	paymentMethod: PaymentMethod;
 };
 
+export type BillingContact = {
+	name?: {
+		namePrefix?: string;
+		givenName?: string;
+		middleName?: string;
+		familyName?: string;
+		nameSuffix?: string;
+		nickname?: string;
+	};
+	emailAddress?: string;
+	phoneNumber?: string;
+	postalAddress?: {
+		street?: string;
+		city?: string;
+		state?: string;
+		postalCode?: string;
+		country?: string;
+		isoCountryCode?: string;
+		subLocality?: string;
+		subAdministrativeArea?: string;
+	};
+};
+
 export type FullPaymentData = {
 	payment: {
 		token: PaymentToken;
+		billingContact?: BillingContact;
 	};
 };
