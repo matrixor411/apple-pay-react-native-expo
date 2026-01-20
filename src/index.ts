@@ -44,4 +44,5 @@ export {
 	CompleteStatus,
 	type BillingContact,
 	type BillingContactField,
+	type FullPaymentData,
 };

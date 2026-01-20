@@ -17,5 +17,5 @@ export default {
         ExpoApplePayModule.complete(status);
     },
 };
-export { MerchantCapability, PaymentNetwork, CompleteStatus };
+export { MerchantCapability, PaymentNetwork, CompleteStatus, };
 //# sourceMappingURL=index.js.map

@@ -1,6 +1,6 @@
 {
 	"name": "apple-pay-react-native-expo",
-	"version": "0.0.10",
+	"version": "0.0.2",
 	"description": "Apple pay integration for Expo",
 	"main": "build/index.js",
 	"types": "build/index.d.ts",

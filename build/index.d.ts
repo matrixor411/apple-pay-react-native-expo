@@ -1,4 +1,4 @@
-import { CompleteStatus, type FullPaymentData, MerchantCapability, PaymentNetwork } from "./ExpoApplePay.types";
+import { CompleteStatus, type BillingContact, type BillingContactField, type FullPaymentData, MerchantCapability, PaymentNetwork } from "./ExpoApplePay.types";
 declare const _default: {
     show: (data: {
         merchantIdentifier: string;
@@ -6,6 +6,7 @@ declare const _default: {
         currencyCode: string;
         merchantCapabilities: MerchantCapability[];
         supportedNetworks: PaymentNetwork[];
+        requiredBillingContactFields?: BillingContactField[];
         paymentSummaryItems: {
             label: string;
             amount: number;
@@ -15,5 +16,5 @@ declare const _default: {
     complete: (status: CompleteStatus) => void;
 };
 export default _default;
-export { MerchantCapability, PaymentNetwork, CompleteStatus };
+export { MerchantCapability, PaymentNetwork, CompleteStatus, type BillingContact, type BillingContactField, type FullPaymentData, };
 //# sourceMappingURL=index.d.ts.map

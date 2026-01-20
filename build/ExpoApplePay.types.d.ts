@@ -37,6 +37,7 @@ export declare enum CompleteStatus {
     success = 0,// Merchant auth'd (or expects to auth) the transaction successfully.
     failure = 1
 }
+export type BillingContactField = "name" | "emailAddress" | "phoneNumber" | "postalAddress";
 export type PaymentData = {
     data: string;
     header: {
@@ -57,9 +58,32 @@ export type PaymentToken = {
     transactionIdentifier: string;
     paymentMethod: PaymentMethod;
 };
+export type BillingContact = {
+    name?: {
+        namePrefix?: string;
+        givenName?: string;
+        middleName?: string;
+        familyName?: string;
+        nameSuffix?: string;
+        nickname?: string;
+    };
+    emailAddress?: string;
+    phoneNumber?: string;
+    postalAddress?: {
+        street?: string;
+        city?: string;
+        state?: string;
+        postalCode?: string;
+        country?: string;
+        isoCountryCode?: string;
+        subLocality?: string;
+        subAdministrativeArea?: string;
+    };
+};
 export type FullPaymentData = {
     payment: {
         token: PaymentToken;
+        billingContact?: BillingContact;
     };
 };
 //# sourceMappingURL=ExpoApplePay.types.d.ts.map
