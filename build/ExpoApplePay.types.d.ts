@@ -37,6 +37,21 @@ export declare enum CompleteStatus {
     success = 0,// Merchant auth'd (or expects to auth) the transaction successfully.
     failure = 1
 }
+export type RecurringIntervalUnit = "day" | "week" | "month" | "year";
+export type RecurringBilling = {
+    label: string;
+    amount: number;
+    intervalUnit: RecurringIntervalUnit;
+    intervalCount?: number;
+    startDate?: string;
+    endDate?: string;
+};
+export type RecurringPaymentRequest = {
+    paymentDescription: string;
+    managementURL: string;
+    billingAgreement?: string;
+    regularBilling: RecurringBilling;
+};
 export type BillingContactField = "name" | "emailAddress" | "phoneNumber" | "postalAddress";
 export type PaymentData = {
     data: string;

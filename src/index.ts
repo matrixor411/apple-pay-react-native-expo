@@ -1,5 +1,6 @@
 import {
 	CompleteStatus,
+	type RecurringPaymentRequest,
 	type BillingContact,
 	type BillingContactField,
 	type FullPaymentData,
@@ -16,6 +17,7 @@ export default {
 		merchantCapabilities: MerchantCapability[];
 		supportedNetworks: PaymentNetwork[];
 		requiredBillingContactFields?: BillingContactField[];
+		recurringPayment?: RecurringPaymentRequest;
 		paymentSummaryItems: {
 			label: string;
 			amount: number;
@@ -23,6 +25,15 @@ export default {
 	}): Promise<FullPaymentData> => {
 		return ExpoApplePayModule.show({
 			...data,
+			recurringPayment: data.recurringPayment
+				? {
+						...data.recurringPayment,
+						regularBilling: {
+							...data.recurringPayment.regularBilling,
+							amount: data.recurringPayment.regularBilling.amount.toString(),
+						},
+				  }
+				: undefined,
 			paymentSummaryItems: data.paymentSummaryItems.map((item) => ({
 				label: item.label,
 				amount: item.amount.toString(),
@@ -42,6 +53,7 @@ export {
 	MerchantCapability,
 	PaymentNetwork,
 	CompleteStatus,
+	type RecurringPaymentRequest,
 	type BillingContact,
 	type BillingContactField,
 	type FullPaymentData,

@@ -7,6 +7,19 @@ declare const _default: {
         merchantCapabilities: MerchantCapability[];
         supportedNetworks: PaymentNetwork[];
         requiredBillingContactFields?: ("name" | "emailAddress" | "phoneNumber" | "postalAddress")[];
+        recurringPayment?: {
+            paymentDescription: string;
+            managementURL: string;
+            billingAgreement?: string;
+            regularBilling: {
+                label: string;
+                amount: string;
+                intervalUnit: "day" | "week" | "month" | "year";
+                intervalCount?: number;
+                startDate?: string;
+                endDate?: string;
+            };
+        };
         paymentSummaryItems: {
             label: string;
             amount: string;

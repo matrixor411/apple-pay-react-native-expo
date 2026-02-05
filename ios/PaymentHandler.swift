@@ -10,6 +10,40 @@ struct PaymentRequestItemData: Record {
     var amount: String
 }
 
+struct RecurringBillingData: Record {
+    @Field
+    var label: String
+
+    @Field
+    var amount: String
+
+    @Field
+    var intervalUnit: String
+
+    @Field
+    var intervalCount: Int? = nil
+
+    @Field
+    var startDate: String? = nil
+
+    @Field
+    var endDate: String? = nil
+}
+
+struct RecurringPaymentRequestData: Record {
+    @Field
+    var paymentDescription: String
+
+    @Field
+    var managementURL: String
+
+    @Field
+    var billingAgreement: String? = nil
+
+    @Field
+    var regularBilling: RecurringBillingData
+}
+
 struct PaymentRequestData: Record {
     @Field
     var merchantIdentifier: String
@@ -31,6 +65,9 @@ struct PaymentRequestData: Record {
 
     @Field
     var requiredBillingContactFields: [String]? = nil
+
+    @Field
+    var recurringPayment: RecurringPaymentRequestData? = nil
 }
 
 typealias PaymentCompletionHandler = (PKPaymentAuthorizationResult) -> Void
@@ -55,6 +92,53 @@ class PaymentHandler: NSObject  {
         paymentRequest.supportedNetworks = getSupportedNetworksFromData(jsSupportedNetworks: data.supportedNetworks)
         if let fields = data.requiredBillingContactFields, !fields.isEmpty {
             paymentRequest.requiredBillingContactFields = getContactFieldsFromData(jsContactFields: fields)
+        }
+
+        if let recurring = data.recurringPayment {
+            if #available(iOS 16.0, *) {
+                guard let managementURL = URL(string: recurring.managementURL) else {
+                    self.promise.reject("invalid_recurring_management_url", "Management URL is invalid")
+                    self.promise = nil
+                    return
+                }
+
+                let regularBilling = PKRecurringPaymentSummaryItem(
+                    label: recurring.regularBilling.label,
+                    amount: NSDecimalNumber(string: recurring.regularBilling.amount)
+                )
+
+                if let intervalUnit = getRecurringIntervalUnitFromData(jsIntervalUnit: recurring.regularBilling.intervalUnit) {
+                    regularBilling.intervalUnit = intervalUnit
+                }
+
+                if let intervalCount = recurring.regularBilling.intervalCount, intervalCount > 0 {
+                    regularBilling.intervalCount = intervalCount
+                }
+
+                if let startDate = parseISO8601Date(recurring.regularBilling.startDate) {
+                    regularBilling.startDate = startDate
+                }
+
+                if let endDate = parseISO8601Date(recurring.regularBilling.endDate) {
+                    regularBilling.endDate = endDate
+                }
+
+                let recurringRequest = PKRecurringPaymentRequest(
+                    paymentDescription: recurring.paymentDescription,
+                    regularBilling: regularBilling,
+                    managementURL: managementURL
+                )
+
+                if let billingAgreement = recurring.billingAgreement, !billingAgreement.isEmpty {
+                    recurringRequest.billingAgreement = billingAgreement
+                }
+
+                paymentRequest.recurringPaymentRequest = recurringRequest
+            } else {
+                self.promise.reject("recurring_requires_ios16", "Recurring payments require iOS 16 or later")
+                self.promise = nil
+                return
+            }
         }
         
         //        paymentRequest.shippingType = .delivery
@@ -151,6 +235,29 @@ class PaymentHandler: NSObject  {
         }
         
         return supportedNetworks;
+    }
+
+    @available(iOS 16.0, *)
+    private func getRecurringIntervalUnitFromData(jsIntervalUnit: String) -> PKRecurringPaymentSummaryItem.IntervalUnit? {
+        switch jsIntervalUnit {
+        case "day":
+            return .day
+        case "week":
+            return .week
+        case "month":
+            return .month
+        case "year":
+            return .year
+        default:
+            return nil
+        }
+    }
+
+    private func parseISO8601Date(_ value: String?) -> Date? {
+        guard let value = value, !value.isEmpty else { return nil }
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate]
+        return formatter.date(from: value)
     }
 
     private func getContactFieldsFromData(jsContactFields: [String]) -> Set<PKContactField> {

@@ -4,6 +4,15 @@ export default {
     show: (data) => {
         return ExpoApplePayModule.show({
             ...data,
+            recurringPayment: data.recurringPayment
+                ? {
+                    ...data.recurringPayment,
+                    regularBilling: {
+                        ...data.recurringPayment.regularBilling,
+                        amount: data.recurringPayment.regularBilling.amount.toString(),
+                    },
+                }
+                : undefined,
             paymentSummaryItems: data.paymentSummaryItems.map((item) => ({
                 label: item.label,
                 amount: item.amount.toString(),

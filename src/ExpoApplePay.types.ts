@@ -40,6 +40,24 @@ export enum CompleteStatus {
 	failure = 1, // Merchant failed to auth the transaction.
 }
 
+export type RecurringIntervalUnit = "day" | "week" | "month" | "year";
+
+export type RecurringBilling = {
+	label: string;
+	amount: number;
+	intervalUnit: RecurringIntervalUnit;
+	intervalCount?: number;
+	startDate?: string; // ISO 8601 date
+	endDate?: string; // ISO 8601 date
+};
+
+export type RecurringPaymentRequest = {
+	paymentDescription: string;
+	managementURL: string;
+	billingAgreement?: string;
+	regularBilling: RecurringBilling;
+};
+
 export type BillingContactField =
 	| "name"
 	| "emailAddress"
