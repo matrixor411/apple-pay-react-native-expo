@@ -1,6 +1,7 @@
 import {
 	CompleteStatus,
 	type RecurringPaymentRequest,
+	type RecurringPaymentRequestInput,
 	type BillingContact,
 	type BillingContactField,
 	type FullPaymentData,
@@ -23,9 +24,8 @@ export default {
 			amount: number;
 		}[];
 	}): Promise<FullPaymentData> => {
-		return ExpoApplePayModule.show({
-			...data,
-			recurringPayment: data.recurringPayment
+		const recurringPayment: RecurringPaymentRequestInput | undefined =
+			data.recurringPayment
 				? {
 						...data.recurringPayment,
 						regularBilling: {
@@ -33,7 +33,11 @@ export default {
 							amount: data.recurringPayment.regularBilling.amount.toString(),
 						},
 				  }
-				: undefined,
+				: undefined;
+
+		return ExpoApplePayModule.show({
+			...data,
+			recurringPayment,
 			paymentSummaryItems: data.paymentSummaryItems.map((item) => ({
 				label: item.label,
 				amount: item.amount.toString(),

@@ -2,6 +2,7 @@ import {
   MerchantCapability,
   PaymentNetwork,
   CompleteStatus,
+  type RecurringPaymentRequestInput,
 } from "./ExpoApplePay.types";
 
 export default {
@@ -17,19 +18,7 @@ export default {
       | "phoneNumber"
       | "postalAddress"
     )[];
-    recurringPayment?: {
-      paymentDescription: string;
-      managementURL: string;
-      billingAgreement?: string;
-      regularBilling: {
-        label: string;
-        amount: string;
-        intervalUnit: "day" | "week" | "month" | "year";
-        intervalCount?: number;
-        startDate?: string;
-        endDate?: string;
-      };
-    };
+    recurringPayment?: RecurringPaymentRequestInput;
     paymentSummaryItems: {
       label: string;
       amount: string;
