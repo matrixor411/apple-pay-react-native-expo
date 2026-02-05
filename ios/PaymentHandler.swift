@@ -134,6 +134,15 @@ class PaymentHandler: NSObject  {
                 }
 
                 paymentRequest.recurringPaymentRequest = recurringRequest
+
+                if data.paymentSummaryItems.isEmpty {
+                    paymentRequest.paymentSummaryItems = [regularBilling]
+                } else {
+                    let additionalItems = data.paymentSummaryItems.dropFirst().map {
+                        PKPaymentSummaryItem(label: $0.label, amount: NSDecimalNumber(string: $0.amount), type: .final)
+                    }
+                    paymentRequest.paymentSummaryItems = [regularBilling] + additionalItems
+                }
             } else {
                 self.promise.reject("recurring_requires_ios16", "Recurring payments require iOS 16 or later")
                 self.promise = nil
@@ -238,7 +247,7 @@ class PaymentHandler: NSObject  {
     }
 
     @available(iOS 16.0, *)
-    private func getRecurringIntervalUnitFromData(jsIntervalUnit: String) -> PKRecurringPaymentSummaryItem.IntervalUnit? {
+    private func getRecurringIntervalUnitFromData(jsIntervalUnit: String) -> PKRecurringPaymentSummaryItemIntervalUnit? {
         switch jsIntervalUnit {
         case "day":
             return .day
@@ -255,9 +264,21 @@ class PaymentHandler: NSObject  {
 
     private func parseISO8601Date(_ value: String?) -> Date? {
         guard let value = value, !value.isEmpty else { return nil }
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withFullDate]
-        return formatter.date(from: value)
+        let fullDateFormatter = ISO8601DateFormatter()
+        fullDateFormatter.formatOptions = [.withFullDate]
+        if let date = fullDateFormatter.date(from: value) {
+            return date
+        }
+
+        let fullDateTimeFormatter = ISO8601DateFormatter()
+        fullDateTimeFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = fullDateTimeFormatter.date(from: value) {
+            return date
+        }
+
+        let fullDateTimeNoFractionFormatter = ISO8601DateFormatter()
+        fullDateTimeNoFractionFormatter.formatOptions = [.withInternetDateTime]
+        return fullDateTimeNoFractionFormatter.date(from: value)
     }
 
     private func getContactFieldsFromData(jsContactFields: [String]) -> Set<PKContactField> {
