@@ -2,17 +2,18 @@ import { CompleteStatus, MerchantCapability, PaymentNetwork, } from "./ExpoApple
 import ExpoApplePayModule from "./ExpoApplePayModule";
 export default {
     show: (data) => {
+        const recurringPayment = data.recurringPayment
+            ? {
+                ...data.recurringPayment,
+                regularBilling: {
+                    ...data.recurringPayment.regularBilling,
+                    amount: data.recurringPayment.regularBilling.amount.toString(),
+                },
+            }
+            : undefined;
         return ExpoApplePayModule.show({
             ...data,
-            recurringPayment: data.recurringPayment
-                ? {
-                    ...data.recurringPayment,
-                    regularBilling: {
-                        ...data.recurringPayment.regularBilling,
-                        amount: data.recurringPayment.regularBilling.amount.toString(),
-                    },
-                }
-                : undefined,
+            recurringPayment,
             paymentSummaryItems: data.paymentSummaryItems.map((item) => ({
                 label: item.label,
                 amount: item.amount.toString(),

@@ -52,6 +52,12 @@ export type RecurringPaymentRequest = {
     billingAgreement?: string;
     regularBilling: RecurringBilling;
 };
+export type RecurringBillingInput = Omit<RecurringBilling, "amount"> & {
+    amount: string;
+};
+export type RecurringPaymentRequestInput = Omit<RecurringPaymentRequest, "regularBilling"> & {
+    regularBilling: RecurringBillingInput;
+};
 export type BillingContactField = "name" | "emailAddress" | "phoneNumber" | "postalAddress";
 export type PaymentData = {
     data: string;

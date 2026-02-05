@@ -1,4 +1,4 @@
-import { MerchantCapability, PaymentNetwork, CompleteStatus } from "./ExpoApplePay.types";
+import { MerchantCapability, PaymentNetwork, CompleteStatus, type RecurringPaymentRequestInput } from "./ExpoApplePay.types";
 declare const _default: {
     show: (_: {
         merchantIdentifier: string;
@@ -7,19 +7,7 @@ declare const _default: {
         merchantCapabilities: MerchantCapability[];
         supportedNetworks: PaymentNetwork[];
         requiredBillingContactFields?: ("name" | "emailAddress" | "phoneNumber" | "postalAddress")[];
-        recurringPayment?: {
-            paymentDescription: string;
-            managementURL: string;
-            billingAgreement?: string;
-            regularBilling: {
-                label: string;
-                amount: string;
-                intervalUnit: "day" | "week" | "month" | "year";
-                intervalCount?: number;
-                startDate?: string;
-                endDate?: string;
-            };
-        };
+        recurringPayment?: RecurringPaymentRequestInput;
         paymentSummaryItems: {
             label: string;
             amount: string;
