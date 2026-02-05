@@ -246,13 +246,12 @@ class PaymentHandler: NSObject  {
         return supportedNetworks;
     }
 
-    @available(iOS 16.0, *)
-    private func getRecurringIntervalUnitFromData(jsIntervalUnit: String) -> PKRecurringPaymentSummaryItemIntervalUnit? {
+    private func getRecurringIntervalUnitFromData(jsIntervalUnit: String) -> NSCalendar.Unit? {
         switch jsIntervalUnit {
         case "day":
             return .day
         case "week":
-            return .week
+            return .weekOfYear
         case "month":
             return .month
         case "year":
